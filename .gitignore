@@ -1,0 +1,18 @@
+# Ignore everything by default
+*
+
+# Allow selected source files
+!utils.py
+!utils_clas.py
+!data.py
+!utils_ms.py
+!contra_main_final.py
+!clas_main_final.py
+
+# Allow selected model files
+!base_model.pt
+!mol_clean_trans_clip_10base.pt
+!pom_clean_trans_clip_10base.pt
+
+# Allow gitignore itself
+!.gitignore

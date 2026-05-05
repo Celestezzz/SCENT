@@ -19,11 +19,8 @@ from data import clip_collate, CLIPDataset, structure_split_indices, MSAugmentor
 def parse_args():
     parser = argparse.ArgumentParser(description="CLIP Fine-tuning for MS and Chem Encoders")
 
-    # --- 路径相关参数 ---
     parser.add_argument('--data_path', type=str, default='.../multimodal_emb_clean', 
                         help='data dir')
-    # parser.add_argument('--chem_csv', type=str, default='curated_GS_LF_merged_4983.csv',
-    #                     help='用于初始化 Chem Encoder 的 CSV 文件名')
     parser.add_argument('--merged_csv', type=str, default='exp_clean.csv',
                         help='data for CLIP training')
     parser.add_argument('--base_model_name', type=str, default='base_model.pt',
@@ -34,8 +31,6 @@ def parse_args():
                         help = 'chemical embedding type for initializing the chem encoder, choose from ["openpom", "molformer"]')
     parser.add_argument('--chem_emb_csv', type=str, default='pom_clean_train_emb.csv')
   
-
-    # --- 训练超参数 ---
     parser.add_argument('--batch_size', type=int, default=512, help='Batch size')
     parser.add_argument('--epochs', type=int, default=50, help='training epoch')
     parser.add_argument('--lr_enc', type=float, default=5e-4, help='Encoder learning rate')
@@ -112,7 +107,7 @@ def main(args):
     # checkpoint = torch.load(base_model_path, map_location=device)
     # ms_encoder.load_state_dict(checkpoint['ms_encoder'])
     # else:
-    #     print(f"⚠️ Warning: MS base model not found at {base_model_path}")
+    #     print(f"Warning: MS base model not found at {base_model_path}")
     
     # # base_model.to(device)
     # ms_encoder = MSTransformer(
@@ -322,7 +317,6 @@ def main(args):
                     'predictor': predictor.state_dict()
                 }
             else:
-            # 保存两个模型参数
                 checkpoint = {
                     'ms_encoder': ms_encoder.state_dict(),
                     'proj': proj.state_dict()

@@ -21,26 +21,26 @@ from utils_ms import Spec2Emb, MSTransformer
 def parse_args():
     parser = argparse.ArgumentParser(description="Downstream Classification")
     parser.add_argument('--data_path', type=str, default='.../multimodal_emb_clean', 
-                        help='数据根目录路径')
+                        help='data root path containing all csv files and where to save results')
     parser.add_argument('--label_file', type=str, default='GSLF_clas',
-                        help='存储gslf是数据的文件夹')
+                        help='gs-lf data folder name under data_path')
     parser.add_argument('--label_csv', type=str, default='train_gslf.csv',
-                        help='用于初始化 Chem Encoder 的 CSV 文件名')
+                        help='label CSV')
     parser.add_argument('--ms_csv', type=str, default='train_ms.csv',
-                        help='用于 CLIP 训练的 Merged CSV 文件名')
+                        help='ms CSV')
     parser.add_argument('--test_ms_df', type=str, default='test_ms.csv',
-                        help='测试集的 MS CSV 文件路径')
+                        help='test set ms csv')
     parser.add_argument('--test_label_df', type=str, default='test_label.csv',
-                        help='测试集的标签 CSV 文件路径')
+                        help='test set label csv')
     parser.add_argument('--base_model_name', type=str, default='base_model.pt',
-                        help='预训练的 MS Encoder 权重文件名')
+                        help='pretrained base model file name under multimodal_emb_clean folder')
     parser.add_argument('--save_model_name', type=str, default='gslf_cla_best.pt',
-                        help='保存的最佳模型文件名')
+                        help='best model checkpoint file name to save under data_path')
     parser.add_argument('--mode', type = str, default = 'ms',
-                        help = '使用的编码器类型')
-    parser.add_argument('--fold',     type=int, required=True,  help='当前折编号 (1~5)')
-    parser.add_argument('--fold_dir', type=str, required=True,  help='kfold_splits 根目录路径')
-    parser.add_argument('--test_dir', type=str, required=True,  help='test 文件夹路径')
+                        help = 'encoder type: openpom, molformer, or ms (default: ms)')
+    parser.add_argument('--fold',     type=int, required=True,  help='current fold index (1-5)')
+    parser.add_argument('--fold_dir', type=str, required=True,  help='kfold_splits dir')
+    parser.add_argument('--test_dir', type=str, required=True,  help='test root dir')
   
 
     # --- 训练超参数 ---
@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument('--fractions', nargs='+', type=float,
                     default=[0.1,0.2,0.4,0.6,0.8,1.0])
     parser.add_argument('--learning_curves_filename', type=str, default='learning_curves.csv',
-                        help='保存学习曲线的文件名')
+                        help='Name of the file to save learning curves')
     parser.add_argument('--top_k', type=int, default=5, help='k for Precision@k metric')
     parser.add_argument('--loss', type=str, default='bce', help='Loss function to use')
     parser.add_argument('--use_augmentor', action='store_true', help='Whether to use data augmentation')
@@ -64,7 +64,6 @@ def parse_args():
     return parser.parse_args()
 
 def main(args):
-    # 1. 设备配置
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     torch.backends.cudnn.deterministic = True
@@ -72,7 +71,6 @@ def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
-    # 设置随机种子 (可选，为了复现)
     # torch.manual_seed(args.seed)
     torch.manual_seed(42)
 

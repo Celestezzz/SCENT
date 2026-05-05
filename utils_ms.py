@@ -11,7 +11,7 @@ import numpy as np
 
 from copy import deepcopy
 
-# EIMS2Vec的utils
+# EIMS2Vec's utils
 
 class Spec2Emb(nn.Module):
     def __init__(self, num_emb:int=1000, emb_dim:int=500):
@@ -200,92 +200,10 @@ class SpecDataset(Dataset):
         return len(self.map)
 
 
-# class MSTransformer(nn.Module):
-#     def __init__(self, base_encoder, d_model=500, nhead=4, num_layers=2):
-#         super().__init__()
-#         # 1. 你的那个修改过、不求和的 Encoder
-#         self.base_encoder = base_encoder 
-        
-#         # 2. [CLS] Token
-#         self.cls_token = nn.Parameter(torch.randn(1, 1, d_model))
-        
-#         # 3. Transformer Encoder
-#         encoder_layer = nn.TransformerEncoderLayer(
-#             d_model=d_model, 
-#             nhead=nhead, 
-#             batch_first=True,
-#             norm_first=True, 
-#             # dim_feedforward=d_model*4,
-#         )
-#         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
-        
-#         # 4. 输出层
-#         self.out_norm = nn.LayerNorm(d_model)
-
-#         # 5. 分子质量投影
-#         self.mw_encoder = nn.Sequential(
-#             nn.Linear(1, d_model // 2),
-#             nn.ReLU(),
-#             nn.Linear(d_model // 2, d_model),
-#             nn.LayerNorm(d_model) # 归一化一下比较稳
-#         )
-
-#     def forward(self, ms_inputs, mw_inputs, mode='emb'):
-#         # =================================================
-#         # 第一步：解包输入 (Mask 就在这里！)
-#         # =================================================
-#         # ms_inputs 来自 dataloader: (mzs, intens, masks)
-#         mzs, intens, raw_masks = ms_inputs
-#         batch_size = mzs.size(0)
-#         device = mzs.device
-
-#         # =================================================
-#         # 第二步：获取 Embedding 序列
-#         # =================================================
-#         # 调用你的 base_encoder (它现在返回 B, Seq, 500)
-#         # 注意：这里直接传 ms_inputs 进去，因为它内部会解包
-#         x = self.base_encoder(ms_inputs, mode='emb') 
-
-#         # =================================================
-#         # 第三步：准备 Transformer 输入 ([CLS] + Emb)
-#         # =================================================
-#         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
-#         mw_tokens = self.mw_encoder(mw_inputs).unsqueeze(1) # (B, 1, 500)
-#         x = torch.cat((cls_tokens, mw_tokens, x), dim=1) # (B, Seq+2, 500)
-
-
-#         # =================================================
-#         # 第四步：制作 Mask (核心步骤)
-#         # =================================================
-#         # 你的 raw_masks: 1=有效, 0=Padding
-#         # Transformer 需要: False=有效, True=Padding (垃圾)
-        
-#         # 1. 对原始 mask 取反，生成 padding_mask
-#         padding_mask = (raw_masks == 0) # (B, Seq)
-        
-#         # 2. 给 [CLS] 补一个 False (永远有效)
-#         cls_mask = torch.zeros((batch_size, 1), dtype=torch.bool, device=device)
-#         # 2.1 给 分子质量 Token 也补一个 False
-#         mw_mask = torch.zeros((batch_size, 1), dtype=torch.bool, device=device)
-        
-#         # 3. 拼接
-#         extended_mask = torch.cat((cls_mask, mw_mask, padding_mask), dim=1) # (B, Seq+2)
-
-#         # =================================================
-#         # 第五步：Transformer 计算
-#         # =================================================
-#         # 把 Embedding 和 Mask 一起喂进去
-#         x_out = self.transformer(x, src_key_padding_mask=extended_mask)
-
-#         # 取出 [CLS]
-#         final_emb = x_out[:, 0, :]
-        
-#         return self.out_norm(final_emb)
 
 class MSTransformer(nn.Module):
     def __init__(self, base_encoder, d_model=500, nhead=4, num_layers=2):
         super().__init__()
-        # 1. 你的那个修改过、不求和的 Encoder
         self.base_encoder = base_encoder 
         
         # 2. [CLS] Token
@@ -301,16 +219,7 @@ class MSTransformer(nn.Module):
         )
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
         
-        # 4. 输出层
         self.out_norm = nn.LayerNorm(d_model)
-
-        # # 5. 分子质量投影
-        # self.mw_encoder = nn.Sequential(
-        #     nn.Linear(1, d_model // 2),
-        #     nn.ReLU(),
-        #     nn.Linear(d_model // 2, d_model),
-        #     nn.LayerNorm(d_model) # 归一化一下比较稳
-        # )
 
     def forward(self, ms_inputs, mode='emb', power = 0.5):
        

@@ -21,17 +21,17 @@ def parse_args():
 
     # --- 路径相关参数 ---
     parser.add_argument('--data_path', type=str, default='.../multimodal_emb_clean', 
-                        help='数据根目录路径')
+                        help='data dir')
     # parser.add_argument('--chem_csv', type=str, default='curated_GS_LF_merged_4983.csv',
     #                     help='用于初始化 Chem Encoder 的 CSV 文件名')
     parser.add_argument('--merged_csv', type=str, default='exp_clean.csv',
-                        help='用于 CLIP 训练的 Merged CSV 文件名')
+                        help='data for CLIP training')
     parser.add_argument('--base_model_name', type=str, default='base_model.pt',
-                        help='预训练的 MS Encoder 权重文件名')
+                        help='pretrained MS Encoder weight file name')
     parser.add_argument('--save_model_name', type=str, default='ms_encoder_clip_best_2lr_full.pt',
-                        help='保存的最佳模型文件名')
+                        help='file name to save the best model')
     parser.add_argument('--chem_model_type', type = str, default = 'openpom',
-                        help = '化学模型')
+                        help = 'chemical embedding type for initializing the chem encoder, choose from ["openpom", "molformer"]')
     parser.add_argument('--chem_emb_csv', type=str, default='pom_clean_train_emb.csv')
   
 
@@ -87,14 +87,14 @@ def main(args):
     # if os.path.exists(base_model_path):
     #     state_dict = torch.load(base_model_path, map_location=device)
     #     base_encoder.load_state_dict(state_dict)
-    #     print(f"✅ MS Encoder weights loaded from {base_model_path}") base_encoder = Spec2Emb() # 确保你的类定义支持默认初始化
+    #     print(f"MS Encoder weights loaded from {base_model_path}") base_encoder = Spec2Emb()
     
     if os.path.exists(base_model_path):
         state_dict = torch.load(base_model_path, map_location=device)
         base_encoder.load_state_dict(state_dict)
-        print(f"✅ MS Encoder weights loaded from {base_model_path}")
+        print(f"MS Encoder weights loaded from {base_model_path}")
     else:
-        print(f"⚠️ Warning: MS base model not found at {base_model_path}")
+        print(f"Warning: MS base model not found at {base_model_path}")
     
     # base_model.to(device)
     if args.use_transformer:
@@ -205,8 +205,7 @@ def main(args):
     for i in range(len(train_ds)):
 
         sample_tuple = train_ds[i]
-        
-        # 从元组中提取第一个元素，即 SMILES 字符串
+ 
         smiles = sample_tuple[SMILES_INDEX] 
         
         train_smiles.add(smiles)

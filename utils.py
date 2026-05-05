@@ -91,27 +91,6 @@ def tanimoto_matrix(fps_batch):
     return tanimoto_mat
 
 
-# def build_negative_mask(chem_emb, ms_emb, fps_batch, tau_fp=0.6, tau_ms=0.8):
-#     B = chem_emb.size(0)
-#     device = chem_emb.device
-
-#     # ---- 1) 批量 Tanimoto 相似度矩阵 (B, B)
-#     tanimoto_mat = tanimoto_matrix(fps_batch).to(device)
-
-#     # ---- 2) 批量 MS 余弦相似度矩阵 (B, B)
-#     ms_sim_mat = F.cosine_similarity(
-#         ms_emb.unsqueeze(1),   # (B,1,D)
-#         ms_emb.unsqueeze(0),   # (1,B,D)
-#         dim=-1
-#     )  # => (B,B)
-
-#     # ---- 3) 满足任一条件就 mask
-#     mask = (tanimoto_mat > tau_fp) #| (ms_sim_mat > tau_ms)
-
-#     # ---- 4) 主对角线设为 False
-#     mask.fill_diagonal_(False)
-
-#     return mask
 
 def build_negative_mask(chem_emb, ms_emb=None, fps_batch=None, tau_fp=None, tau_ms=None):
     """
@@ -323,7 +302,7 @@ def train_clip(ms_encoder, dataloader, proj, device, optimizer, loss_type = "cli
                         os.remove(file_path)
                     except OSError:
                         pass
-            print("临时硬盘缓存已清理")
+            print("temp cache cleared.")
 
     print(f"Epoch Loss = {sum(epoch_loss)/len(epoch_loss):.6f}")
     return sum(epoch_loss)/len(epoch_loss)
@@ -450,5 +429,5 @@ def plot_validation_metrics(topk_sim_history, val_loss_history, val_auc_history,
     
     plot_file = os.path.join(save_dir, "validation_metrics_plot.png")
     plt.savefig(plot_file)
-    print(f"🎉 验证指标图表已保存至: {plot_file}")
+    print(f"🎉 metric plots saved to: {plot_file}")
     plt.show()

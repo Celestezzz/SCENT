@@ -113,10 +113,13 @@ def train_classfication(encoder, classification_head, dataloader, optimizer, cri
             ms_inputs = (mzs_gpu, intens_gpu, masks_gpu)
         
 
-            with torch.no_grad():
-                ms_emb = encoder(ms_inputs, mode='emb')
-                if use_sum:
-                    ms_emb = ms_emb.sum(dim=1) 
+            # with torch.no_grad():
+            #     ms_emb = encoder(ms_inputs, mode='emb')
+            #     if use_sum:
+            #         ms_emb = ms_emb.sum(dim=1) 
+            ms_emb = encoder(ms_inputs, mode='emb')
+            if use_sum:
+                ms_emb = ms_emb.sum(dim=1) 
             ms_emb = ms_emb.detach()        
 
             features_for_head = ms_emb

@@ -274,8 +274,7 @@ def main(args):
             print(f"[Epoch {epoch+1}] Train Loss = {train_loss:.6f}")
 
             # VALIDATE
-            val_loss, micro_auc, weighted_auc_val, prec_k_val, val_labels_np, val_probs_np = valid_classification(ms_encoder, classification_head, val_loader, criterion, device, freeze, use_sum
-            )
+            val_loss, micro_auc, weighted_auc_val, prec_k_val, val_labels_np, val_probs_np = valid_classification(ms_encoder, classification_head, val_loader, criterion, device, freeze, use_sum, pos_weight_tensor) 
             print(f"[Epoch {epoch+1}] Val   Loss = {val_loss:.6f}")
 
             scheduler.step(val_loss)
@@ -308,7 +307,7 @@ def main(args):
         ms_encoder.load_state_dict(checkpoint['ms_encoder'])
         classification_head.load_state_dict(checkpoint['classification'])
 
-        test_loss, micro_auc_test, weighted_auc_test, prec_k_test, test_labels_np, test_probs_np = valid_classification(ms_encoder, classification_head, test_loader, criterion, device, freeze, use_sum)
+        test_loss, micro_auc_test, weighted_auc_test, prec_k_test, test_labels_np, test_probs_np = valid_classification(ms_encoder, classification_head, test_loader, criterion, device, freeze, use_sum, pos_weight_tensor)
         print(f"Final Test Loss = {test_loss:.6f}")
         print(f"Final Test AUC = {micro_auc_test:.6f}")
         print(f"Final Test Weighted AUC = {weighted_auc_test:.6f}")

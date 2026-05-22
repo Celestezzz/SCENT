@@ -91,7 +91,7 @@ import torch, numpy as np, pandas as pd
 from torch.utils.data import DataLoader
 
 from utils_ms import Spec2Emb, MSTransformer
-from data    import ClassificationData, classification_collate
+from data    import CLIPDataset, clip_collate
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 CKPT_POM = "pom_clean_trans_clip_10base.pt"            # checkpoint from contra_main_final.py
@@ -115,12 +115,11 @@ proj = torch.nn.Linear(500, 768).to(DEVICE)   # use 256 for OpenPOM
 proj.load_state_dict(state["proj"])
 proj.eval()
 
-# 4. Run on your own MS table (same schema as described above).
-#    ClassificationData accepts label=None, chem_emb=None for pure inference.
-df = pd.read_csv("your_ms_table.csv")
-ds = ClassificationData(df, label=None, chem_emb=None)
+# 4. Run on your own merged MS+chem table (same schema used during training).
+df = pd.read_csv("your_merged_table.csv")
+ds = CLIPDataset(df, augmentor=None, training=False)
 loader = DataLoader(ds, batch_size=64, shuffle=False,
-                    collate_fn=classification_collate)
+                    collate_fn=clip_collate)
 
 all_emb = []
 with torch.no_grad():

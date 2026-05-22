@@ -16,3 +16,10 @@
 
 # Allow gitignore itself
 !.gitignore
+
+# Public documentation
+!README.md
+
+# README figures
+!fig/
+!fig/**
